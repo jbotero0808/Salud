@@ -29,6 +29,15 @@ export function AuthProvider({ children }) {
     return data.medico;
   };
 
+  const actualizarMedico = (medicoParcial) => {
+    const actualizado = { ...medico, ...medicoParcial };
+    localStorage.setItem('salud_medico', JSON.stringify(actualizado));
+    setMedico(actualizado);
+    aplicarPaleta(actualizado.color_primario);
+    aplicarFavicon(actualizado.foto_logo_url);
+    aplicarTitulo(actualizado.empresa);
+  };
+
   const logout = useCallback(() => {
     localStorage.removeItem('salud_token');
     localStorage.removeItem('salud_medico');
@@ -72,7 +81,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ medico, modulos, cargando, login, logout, refrescarPerfil, tieneModulo }}
+      value={{ medico, modulos, cargando, login, logout, refrescarPerfil, tieneModulo, actualizarMedico }}
     >
       {children}
     </AuthContext.Provider>

@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import PacientesPage from './pages/pacientes/PacientesPage';
 import CitasPage from './pages/citas/CitasPage';
 import HistoriasPage from './pages/historias/HistoriasPage';
+import ConfiguracionPage from './pages/configuracion/ConfiguracionPage';
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
             <Route path="pacientes" element={<PacientesPage />} />
             <Route path="citas" element={<CitasPage />} />
             <Route path="historias" element={<HistoriasPage />} />
+            <Route path="configuracion" element={<ConfiguracionPage />} />
           </Route>
         </Routes>
       </AuthProvider>
