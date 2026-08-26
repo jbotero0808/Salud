@@ -3,7 +3,6 @@ import { AuthProvider } from './context/AuthContext';
 import RutaProtegida from './components/RutaProtegida';
 import AppLayout from './components/layout/AppLayout';
 import Login from './pages/auth/Login';
-import Registro from './pages/auth/Registro';
 import Dashboard from './pages/Dashboard';
 import PacientesPage from './pages/pacientes/PacientesPage';
 import CitasPage from './pages/citas/CitasPage';
@@ -15,7 +14,6 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/registro" element={<Registro />} />
 
           <Route
             path="/"

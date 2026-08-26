@@ -6,7 +6,8 @@
   "type": "commonjs",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "crear-medico": "node scripts/crear-medico.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

@@ -7,7 +7,6 @@ function firmarToken(medico) {
   const payload = {
     medico_id: medico.id,
     correo: medico.correo,
-    schema_name: medico.schema_name,
     color_primario: medico.color_primario,
   };
   return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });

@@ -1,12 +1,11 @@
 const { Router } = require('express');
 const ctrl = require('../controllers/citas.controller');
 const { autenticarJWT } = require('../middleware/auth.middleware');
-const { asignarTenant } = require('../middleware/tenant.middleware');
 const { requiereModulo } = require('../middleware/modulo.middleware');
 
 const router = Router();
 
-router.use(autenticarJWT, requiereModulo('citas'), asignarTenant);
+router.use(autenticarJWT, requiereModulo('citas'));
 
 router.get('/', ctrl.listar);
 router.get('/hoy', ctrl.agendaHoy);

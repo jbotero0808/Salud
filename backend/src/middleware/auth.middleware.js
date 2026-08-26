@@ -10,7 +10,7 @@ function autenticarJWT(req, res, next) {
 
   try {
     const payload = verificarToken(token);
-    req.user = payload; // { medico_id, correo, schema_name, color_primario }
+    req.user = payload; // { medico_id, correo, color_primario }
     next();
   } catch (err) {
     return res.status(401).json({ error: 'Token inválido o expirado' });

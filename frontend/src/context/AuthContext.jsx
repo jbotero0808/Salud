@@ -29,12 +29,6 @@ export function AuthProvider({ children }) {
     return data.medico;
   };
 
-  const registrar = async (datosFormulario) => {
-    const { data } = await api.post('/auth/registro', datosFormulario);
-    persistirSesion(data.token, data.medico);
-    return data.medico;
-  };
-
   const logout = useCallback(() => {
     localStorage.removeItem('salud_token');
     localStorage.removeItem('salud_medico');
@@ -78,7 +72,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ medico, modulos, cargando, login, registrar, logout, refrescarPerfil, tieneModulo }}
+      value={{ medico, modulos, cargando, login, logout, refrescarPerfil, tieneModulo }}
     >
       {children}
     </AuthContext.Provider>

@@ -1,12 +1,11 @@
 const { Router } = require('express');
 const ctrl = require('../controllers/pacientes.controller');
 const { autenticarJWT } = require('../middleware/auth.middleware');
-const { asignarTenant } = require('../middleware/tenant.middleware');
 const { requiereModulo } = require('../middleware/modulo.middleware');
 
 const router = Router();
 
-router.use(autenticarJWT, requiereModulo('pacientes'), asignarTenant);
+router.use(autenticarJWT, requiereModulo('pacientes'));
 
 router.get('/', ctrl.listar);
 router.get('/:id', ctrl.obtener);

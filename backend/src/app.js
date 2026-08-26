@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 
+const { pool } = require('./config/db');
 const authRoutes = require('./routes/auth.routes');
 const pacientesRoutes = require('./routes/pacientes.routes');
 const citasRoutes = require('./routes/citas.routes');
@@ -14,6 +15,14 @@ const app = express();
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json({ limit: '8mb' })); // las evoluciones pueden incluir imágenes en base64
 app.use(morgan('dev'));
+
+// Cada despliegue se conecta a la base de datos de un único cliente
+// (una base de datos por tenant), así que basta con exponer el pool
+// compartido en cada petición — no hay cambio de esquema que resolver.
+app.use((req, res, next) => {
+  req.db = pool;
+  next();
+});
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 

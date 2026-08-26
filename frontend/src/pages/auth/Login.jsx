@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Login() {
@@ -42,9 +42,6 @@ export default function Login() {
             {enviando ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
-        <div className="auth-switch">
-          ¿No tienes cuenta? <Link to="/registro">Regístrate</Link>
-        </div>
       </div>
     </div>
   );
