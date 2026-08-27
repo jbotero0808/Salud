@@ -7,6 +7,7 @@ import { archivoABase64 } from '../../utils/archivo';
 export default function PerfilForm() {
   const { medico, actualizarMedico } = useAuth();
   const [nombre, setNombre] = useState(medico?.nombre || '');
+  const [profesion, setProfesion] = useState(medico?.profesion || '');
   const [fotoLogoUrl, setFotoLogoUrl] = useState(medico?.foto_logo_url || '');
   const [colorPrimario, setColorPrimario] = useState(medico?.color_primario || 'azul');
   const [guardando, setGuardando] = useState(false);
@@ -29,6 +30,7 @@ export default function PerfilForm() {
     try {
       const { data } = await api.put('/auth/perfil', {
         nombre,
+        profesion,
         foto_logo_url: fotoLogoUrl || null,
         color_primario: colorPrimario,
       });
@@ -50,6 +52,15 @@ export default function PerfilForm() {
       <div className="form-group">
         <label>Nombre</label>
         <input value={nombre} onChange={(e) => setNombre(e.target.value)} required />
+      </div>
+
+      <div className="form-group">
+        <label>Profesión</label>
+        <input
+          value={profesion}
+          onChange={(e) => setProfesion(e.target.value)}
+          placeholder="Fisioterapeuta, Médico, Odontólogo..."
+        />
       </div>
 
       <div className="form-group">

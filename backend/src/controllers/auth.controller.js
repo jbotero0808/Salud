@@ -16,7 +16,7 @@ async function login(req, res, next) {
 
   try {
     const { rows } = await pool.query(
-      `SELECT id, nombre, correo, password_hash, color_primario, foto_logo_url, empresa
+      `SELECT id, nombre, correo, password_hash, color_primario, foto_logo_url, empresa, profesion
          FROM public.medicos
         WHERE correo = $1`,
       [correo]
@@ -43,6 +43,7 @@ async function login(req, res, next) {
         color_primario: medico.color_primario,
         foto_logo_url: medico.foto_logo_url,
         empresa: medico.empresa,
+        profesion: medico.profesion,
       },
     });
   } catch (err) {
@@ -53,7 +54,7 @@ async function login(req, res, next) {
 async function perfil(req, res, next) {
   try {
     const { rows } = await pool.query(
-      `SELECT id, nombre, correo, celular, foto_logo_url, documento_identidad, empresa, color_primario, fecha_registro
+      `SELECT id, nombre, correo, celular, foto_logo_url, documento_identidad, empresa, profesion, color_primario, fecha_registro
          FROM public.medicos
         WHERE id = $1`,
       [req.user.medico_id]
@@ -79,7 +80,7 @@ async function perfil(req, res, next) {
 }
 
 async function actualizarPerfil(req, res, next) {
-  const { nombre, foto_logo_url, color_primario } = req.body;
+  const { nombre, foto_logo_url, color_primario, profesion } = req.body;
 
   if (!nombre || !nombre.trim()) {
     return res.status(400).json({ error: 'El nombre es obligatorio' });
@@ -93,10 +94,11 @@ async function actualizarPerfil(req, res, next) {
       `UPDATE public.medicos SET
          nombre = $1,
          foto_logo_url = $2,
-         color_primario = COALESCE($3, color_primario)
-       WHERE id = $4
-       RETURNING id, nombre, correo, color_primario, foto_logo_url, empresa`,
-      [nombre.trim(), foto_logo_url || null, color_primario || null, req.user.medico_id]
+         color_primario = COALESCE($3, color_primario),
+         profesion = $4
+       WHERE id = $5
+       RETURNING id, nombre, correo, color_primario, foto_logo_url, empresa, profesion`,
+      [nombre.trim(), foto_logo_url || null, color_primario || null, profesion || null, req.user.medico_id]
     );
 
     if (rows.length === 0) {

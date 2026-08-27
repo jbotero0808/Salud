@@ -15,9 +15,13 @@ CREATE TABLE IF NOT EXISTS public.medicos (
     foto_logo_url       TEXT,
     documento_identidad VARCHAR(50) NOT NULL UNIQUE,
     empresa             VARCHAR(150),
+    profesion           VARCHAR(100),
     color_primario      VARCHAR(20) NOT NULL DEFAULT 'azul',
     fecha_registro      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Migración progresiva: agrega la columna si la tabla ya existía de una versión anterior.
+ALTER TABLE public.medicos ADD COLUMN IF NOT EXISTS profesion VARCHAR(100);
 
 CREATE TABLE IF NOT EXISTS public.modulos (
     id          SERIAL PRIMARY KEY,

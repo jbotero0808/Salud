@@ -91,29 +91,38 @@ export async function generarPdfHistoria({ historia, paciente, medico }) {
   doc.setTextColor(90, 90, 90);
   doc.text(medico?.nombre || '', xTexto, y + 13);
 
-  y += 26;
+  if (medico?.profesion) {
+    doc.setFontSize(9.5);
+    doc.setTextColor(130, 130, 130);
+    doc.text(medico.profesion, xTexto, y + 18.5);
+  }
+
+  y += 30;
   doc.setDrawColor(pr, pg, pb);
   doc.setLineWidth(1.2);
   doc.line(margen, y, anchoPagina - margen, y);
-  y += 10;
+  y += 12;
 
   // ---------- Título ----------
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(15);
   doc.setTextColor(30, 30, 30);
   doc.text('Historia Clínica', margen, y);
-  y += 10;
+  y += 11;
 
   // ---------- Datos del paciente ----------
   const filaInfo = (etiqueta, valor) => {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.setTextColor(dr, dg, db);
-    doc.text(`${etiqueta}:`, margen, y);
+    const textoEtiqueta = `${etiqueta}:  `;
+    doc.text(textoEtiqueta, margen, y);
+    const anchoEtiqueta = doc.getTextWidth(textoEtiqueta);
+
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(40, 40, 40);
-    doc.text(String(valor ?? '—'), margen + 32, y);
-    y += 7;
+    doc.text(String(valor ?? '—'), margen + anchoEtiqueta, y);
+    y += 8;
   };
 
   filaInfo('Paciente', paciente?.nombre);
@@ -125,11 +134,11 @@ export async function generarPdfHistoria({ historia, paciente, medico }) {
     filaInfo('Próxima revisión', FECHA_LARGA.format(new Date(historia.proxima_revision)));
   }
 
-  y += 4;
+  y += 5;
   doc.setDrawColor(220, 220, 220);
   doc.setLineWidth(0.3);
   doc.line(margen, y, anchoPagina - margen, y);
-  y += 10;
+  y += 12;
 
   // ---------- Secciones de texto largo ----------
   const seccion = (titulo, contenido) => {
@@ -137,14 +146,14 @@ export async function generarPdfHistoria({ historia, paciente, medico }) {
     doc.setFontSize(12);
     doc.setTextColor(pr, pg, pb);
     doc.text(titulo, margen, y);
-    y += 7;
+    y += 8;
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     doc.setTextColor(40, 40, 40);
     const lineas = doc.splitTextToSize(contenido && contenido.trim() ? contenido : '—', anchoPagina - margen * 2);
     doc.text(lineas, margen, y);
-    y += lineas.length * 5.5 + 8;
+    y += lineas.length * 6 + 10;
   };
 
   seccion('Observaciones', historia?.observaciones);

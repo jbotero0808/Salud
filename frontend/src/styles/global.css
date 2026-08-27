@@ -65,6 +65,13 @@ a { color: var(--primary-color); }
   box-shadow: 0 0 0 3px var(--primary-color-light);
 }
 
+/* Colorea el selector nativo de fecha/hora del navegador con el tema del médico */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  accent-color: var(--primary-color);
+}
+
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -364,6 +371,7 @@ th { color: var(--text-muted); font-weight: 600; }
   min-height: 420px;
   display: flex;
   flex-direction: column;
+  border: 2px solid var(--primary-color);
 }
 @media (max-width: 1100px) {
   .fieldset-box--tall { min-height: 300px; }
