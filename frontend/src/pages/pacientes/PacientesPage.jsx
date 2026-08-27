@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import Modal from '../../components/Modal';
 import PacienteForm from './PacienteForm';
+import AvatarPaciente from '../../components/AvatarPaciente';
 
 export default function PacientesPage() {
   const [pacientes, setPacientes] = useState([]);
@@ -55,12 +56,13 @@ export default function PacientesPage() {
           <table>
             <thead>
               <tr>
-                <th>Nombre</th><th>Cédula</th><th>Celular</th><th>Correo</th><th></th>
+                <th></th><th>Nombre</th><th>Cédula</th><th>Celular</th><th>Correo</th><th></th>
               </tr>
             </thead>
             <tbody>
               {pacientes.map((p) => (
                 <tr key={p.id}>
+                  <td><AvatarPaciente paciente={p} /></td>
                   <td>{p.nombre}</td>
                   <td>{p.cedula}</td>
                   <td>{p.celular}</td>
@@ -72,7 +74,7 @@ export default function PacientesPage() {
                 </tr>
               ))}
               {pacientes.length === 0 && (
-                <tr><td colSpan={5}>No hay pacientes registrados.</td></tr>
+                <tr><td colSpan={6}>No hay pacientes registrados.</td></tr>
               )}
             </tbody>
           </table>

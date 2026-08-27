@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
+import AvatarPaciente from '../../components/AvatarPaciente';
 
 export default function PacienteListaLateral({ pacienteSeleccionadoId, onSeleccionar }) {
   const [busqueda, setBusqueda] = useState('');
@@ -38,11 +39,7 @@ export default function PacienteListaLateral({ pacienteSeleccionadoId, onSelecci
             className={`paciente-item ${pacienteSeleccionadoId === p.id ? 'is-selected' : ''}`}
             onClick={() => onSeleccionar(p)}
           >
-            {p.foto_url ? (
-              <img src={p.foto_url} alt={p.nombre} className="paciente-item__avatar" />
-            ) : (
-              <div className="paciente-item__avatar-placeholder">{p.nombre?.[0]?.toUpperCase()}</div>
-            )}
+            <AvatarPaciente paciente={p} />
             <div>
               <div><strong>Nombre:</strong> {p.nombre}</div>
               <div><strong>Celular:</strong> {p.celular || '—'}</div>
