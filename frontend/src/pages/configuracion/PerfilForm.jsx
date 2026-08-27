@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import SelectorPaleta from '../../components/SelectorPaleta';
+import { archivoABase64 } from '../../utils/archivo';
 
 export default function PerfilForm() {
   const { medico, actualizarMedico } = useAuth();
@@ -11,6 +12,14 @@ export default function PerfilForm() {
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState('');
   const [exito, setExito] = useState(false);
+  const inputArchivoRef = useRef(null);
+
+  const handleArchivo = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const base64 = await archivoABase64(file);
+    setFotoLogoUrl(base64);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,8 +53,30 @@ export default function PerfilForm() {
       </div>
 
       <div className="form-group">
-        <label>URL de foto / logo</label>
-        <input value={fotoLogoUrl} onChange={(e) => setFotoLogoUrl(e.target.value)} placeholder="https://..." />
+        <label>Logo</label>
+        <div
+          className="image-upload-box"
+          onClick={() => inputArchivoRef.current?.click()}
+        >
+          {fotoLogoUrl ? <img src={fotoLogoUrl} alt="Logo" /> : <span>📷</span>}
+        </div>
+        <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', marginTop: 6 }}>
+          Clic para {fotoLogoUrl ? 'cambiar' : 'cargar'} imagen
+        </div>
+        {fotoLogoUrl && (
+          <div style={{ textAlign: 'center' }}>
+            <button type="button" className="btn btn-secondary" style={{ marginTop: 8, padding: '4px 12px', fontSize: 12 }} onClick={() => setFotoLogoUrl('')}>
+              Quitar imagen
+            </button>
+          </div>
+        )}
+        <input
+          ref={inputArchivoRef}
+          type="file"
+          accept="image/*"
+          onChange={handleArchivo}
+          style={{ display: 'none' }}
+        />
       </div>
 
       <div className="form-group">

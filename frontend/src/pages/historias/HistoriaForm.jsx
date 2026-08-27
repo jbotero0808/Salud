@@ -1,14 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import api from '../../services/api';
-
-function archivoABase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+import { archivoABase64 } from '../../utils/archivo';
 
 export default function HistoriaForm({ onGuardar }) {
   const [tiposConsulta, setTiposConsulta] = useState([]);
