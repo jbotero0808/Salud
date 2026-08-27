@@ -51,7 +51,9 @@ export async function generarPdfHistoria({ historia, paciente, medico }) {
 
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const anchoPagina = doc.internal.pageSize.getWidth();
+  const alturaPagina = doc.internal.pageSize.getHeight();
   const margen = 18;
+  const margenInferior = 24;
   let y = 20;
 
   // ---------- Encabezado: logo + empresa + médico ----------
@@ -145,8 +147,46 @@ export async function generarPdfHistoria({ historia, paciente, medico }) {
   seccion('Observaciones', historia?.observaciones);
   seccion('Tratamiento', historia?.tratamiento);
 
+  // ---------- Imagen adjunta a la evolución ----------
+  if (historia?.imagen_url) {
+    try {
+      const dataUrl = historia.imagen_url.startsWith('data:')
+        ? historia.imagen_url
+        : await urlABase64(historia.imagen_url);
+      const formato = formatoDeDataUrl(dataUrl) || 'JPEG';
+      const dims = await medirImagen(dataUrl);
+
+      const anchoMax = anchoPagina - margen * 2;
+      const altoMax = 100;
+      let w = anchoMax;
+      let h = altoMax;
+      if (dims && dims.ancho && dims.alto) {
+        h = w / (dims.ancho / dims.alto);
+        if (h > altoMax) {
+          h = altoMax;
+          w = h * (dims.ancho / dims.alto);
+        }
+      }
+
+      if (y + 7 + h > alturaPagina - margenInferior) {
+        doc.addPage();
+        y = 20;
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(pr, pg, pb);
+      doc.text('Imagen adjunta', margen, y);
+      y += 7;
+
+      doc.addImage(dataUrl, formato, margen, y, w, h);
+      y += h + 8;
+    } catch {
+      // Si la imagen no se puede cargar, se omite sin romper el resto del PDF.
+    }
+  }
+
   // ---------- Pie de página ----------
-  const alturaPagina = doc.internal.pageSize.getHeight();
   doc.setDrawColor(230, 230, 230);
   doc.line(margen, alturaPagina - 16, anchoPagina - margen, alturaPagina - 16);
   doc.setFont('helvetica', 'normal');
