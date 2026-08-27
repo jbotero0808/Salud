@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const morgan = require('morgan');
 
 const { pool } = require('./config/db');
@@ -12,6 +13,13 @@ const { manejadorErrores } = require('./middleware/error.middleware');
 
 const app = express();
 
+// Vercel entrega la petición a través de su propio proxy/edge; sin esto,
+// express-rate-limit vería siempre la IP del proxy en vez de la del
+// cliente real (y además lanza un error de validación al detectar
+// X-Forwarded-For con trust proxy sin configurar).
+app.set('trust proxy', 1);
+
+app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json({ limit: '8mb' })); // las evoluciones pueden incluir imágenes en base64
 app.use(morgan('dev'));
