@@ -8,6 +8,20 @@ const COLORES_VALIDOS = ['rojo', 'azul', 'verde', 'morado', 'naranja', 'teal'];
 // No hay registro público: cada base de datos pertenece a un único
 // cliente y su médico se crea con backend/scripts/crear-medico.js.
 
+// Endpoint público (sin JWT): permite pintar el login con el logo y el
+// color del médico antes de autenticarse. Como cada base de datos
+// pertenece a un único cliente, no hay ambigüedad sobre qué marca mostrar.
+async function branding(req, res, next) {
+  try {
+    const { rows } = await pool.query(
+      `SELECT foto_logo_url, color_primario, empresa FROM public.medicos ORDER BY id LIMIT 1`
+    );
+    return res.json(rows[0] || { foto_logo_url: null, color_primario: 'azul', empresa: null });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function login(req, res, next) {
   const { correo, password } = req.body;
   if (!correo || !password) {
@@ -147,4 +161,4 @@ async function cambiarPassword(req, res, next) {
   }
 }
 
-module.exports = { login, perfil, actualizarPerfil, cambiarPassword };
+module.exports = { branding, login, perfil, actualizarPerfil, cambiarPassword };
