@@ -6,6 +6,7 @@ export default function HistoriaForm({ onGuardar }) {
   const [tiposConsulta, setTiposConsulta] = useState([]);
   const [tipoConsulta, setTipoConsulta] = useState('');
   const [observaciones, setObservaciones] = useState('');
+  const [tratamiento, setTratamiento] = useState('');
   const [imagenBase64, setImagenBase64] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState('');
@@ -29,6 +30,7 @@ export default function HistoriaForm({ onGuardar }) {
 
   const limpiar = () => {
     setObservaciones('');
+    setTratamiento('');
     setImagenBase64(null);
     if (inputArchivoRef.current) inputArchivoRef.current.value = '';
   };
@@ -45,6 +47,7 @@ export default function HistoriaForm({ onGuardar }) {
       await onGuardar({
         tipo_consulta: tipoConsulta,
         observaciones,
+        tratamiento,
         imagen_url: imagenBase64,
       });
       limpiar();
@@ -75,6 +78,17 @@ export default function HistoriaForm({ onGuardar }) {
           rows={6}
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
+          style={{ border: 'none', width: '100%', resize: 'vertical' }}
+        />
+      </fieldset>
+
+      <fieldset className="fieldset-box">
+        <legend>Tratamiento</legend>
+        <textarea
+          rows={4}
+          value={tratamiento}
+          onChange={(e) => setTratamiento(e.target.value)}
+          placeholder="Terapia o tratamiento a seguir..."
           style={{ border: 'none', width: '100%', resize: 'vertical' }}
         />
       </fieldset>
