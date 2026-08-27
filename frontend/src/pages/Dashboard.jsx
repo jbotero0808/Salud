@@ -6,6 +6,7 @@ export default function Dashboard() {
   const { tieneModulo } = useAuth();
   const [agenda, setAgenda] = useState([]);
   const [pacientesCount, setPacientesCount] = useState(null);
+  const [citaExpandidaId, setCitaExpandidaId] = useState(null);
 
   useEffect(() => {
     if (tieneModulo('citas')) {
@@ -36,12 +37,31 @@ export default function Dashboard() {
       <div className="card">
         <h2 className="text-primary">Agenda de hoy</h2>
         {agenda.length === 0 && <p>No tienes citas programadas para hoy.</p>}
-        {agenda.map((cita) => (
-          <div key={cita.id} className="calendar-slot">
-            <strong>{new Date(cita.fecha_inicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
-            {' '}— {cita.paciente_nombre} ({cita.estado})
-          </div>
-        ))}
+        {agenda.map((cita) => {
+          const expandida = citaExpandidaId === cita.id;
+          return (
+            <div
+              key={cita.id}
+              className={`calendar-slot calendar-slot--clickable ${expandida ? 'is-expanded' : ''}`}
+              onClick={() => setCitaExpandidaId(expandida ? null : cita.id)}
+            >
+              <div className="calendar-slot__header">
+                <span>
+                  <strong>{new Date(cita.fecha_inicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
+                  {' '}— {cita.paciente_nombre} ({cita.estado})
+                </span>
+                <span className="calendar-slot__chevron">{expandida ? '▲' : '▼'}</span>
+              </div>
+              {expandida && (
+                cita.notas ? (
+                  <div className="calendar-slot__notas">{cita.notas}</div>
+                ) : (
+                  <div className="calendar-slot__notas calendar-slot__notas--vacio">Sin notas para esta cita.</div>
+                )
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

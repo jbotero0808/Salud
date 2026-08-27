@@ -341,6 +341,24 @@ th { color: var(--text-muted); font-weight: 600; }
   padding: 8px;
   margin-bottom: 6px;
 }
+.calendar-slot--clickable { cursor: pointer; }
+.calendar-slot--clickable.is-expanded { border-color: var(--primary-color); }
+.calendar-slot__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.calendar-slot__chevron { color: var(--text-muted); font-size: 11px; flex-shrink: 0; }
+.calendar-slot__notas {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+  font-size: 13px;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+.calendar-slot__notas--vacio { color: var(--text-muted); font-style: italic; }
 
 /* ---------- Historia clínica: layout de 3 columnas ---------- */
 .historia-layout {
