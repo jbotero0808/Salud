@@ -48,7 +48,7 @@ export default function HistoriasPage() {
           )}
         </fieldset>
 
-        <HistorialColumna historias={historias} cargando={cargandoHistorias} />
+        <HistorialColumna historias={historias} cargando={cargandoHistorias} paciente={paciente} />
       </div>
     </div>
   );

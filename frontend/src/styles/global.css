@@ -435,6 +435,19 @@ th { color: var(--text-muted); font-weight: 600; }
   margin-top: 8px;
 }
 
+.historial-entry-pdf-link {
+  background: none;
+  border: none;
+  color: var(--primary-color-dark);
+  font-weight: 600;
+  font-size: 12.5px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.historial-entry-pdf-link:hover { filter: brightness(0.85); }
+.historial-entry-pdf-link:disabled { opacity: 0.6; cursor: wait; text-decoration: none; }
+
 .locked-banner {
   background: #fff3cd;
   border: 1px solid #ffe69c;
