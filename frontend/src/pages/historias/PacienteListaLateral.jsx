@@ -38,9 +38,16 @@ export default function PacienteListaLateral({ pacienteSeleccionadoId, onSelecci
             className={`paciente-item ${pacienteSeleccionadoId === p.id ? 'is-selected' : ''}`}
             onClick={() => onSeleccionar(p)}
           >
-            <div><strong>Nombre:</strong> {p.nombre}</div>
-            <div><strong>Celular:</strong> {p.celular || '—'}</div>
-            <div><strong>Correo:</strong> {p.correo || '—'}</div>
+            {p.foto_url ? (
+              <img src={p.foto_url} alt={p.nombre} className="paciente-item__avatar" />
+            ) : (
+              <div className="paciente-item__avatar-placeholder">{p.nombre?.[0]?.toUpperCase()}</div>
+            )}
+            <div>
+              <div><strong>Nombre:</strong> {p.nombre}</div>
+              <div><strong>Celular:</strong> {p.celular || '—'}</div>
+              <div><strong>Correo:</strong> {p.correo || '—'}</div>
+            </div>
           </div>
         ))}
       </div>

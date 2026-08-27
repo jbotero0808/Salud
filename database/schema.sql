@@ -53,9 +53,13 @@ CREATE TABLE IF NOT EXISTS public.pacientes (
     genero          VARCHAR(20),
     fecha_nacimiento DATE,
     direccion       TEXT,
+    foto_url        TEXT,
     activo          CHAR(1) NOT NULL DEFAULT 's' CHECK (activo IN ('s','n')),
     fecha_registro  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Migración progresiva: agrega la columna si la tabla ya existía de una versión anterior.
+ALTER TABLE public.pacientes ADD COLUMN IF NOT EXISTS foto_url TEXT;
 
 CREATE TABLE IF NOT EXISTS public.citas (
     id           SERIAL PRIMARY KEY,

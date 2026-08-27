@@ -1,14 +1,23 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { archivoABase64 } from '../../utils/archivo';
 
 const VACIO = {
-  nombre: '', cedula: '', celular: '', correo: '', genero: '', fecha_nacimiento: '', direccion: '',
+  nombre: '', cedula: '', celular: '', correo: '', genero: '', fecha_nacimiento: '', direccion: '', foto_url: '',
 };
 
 export default function PacienteForm({ inicial, onGuardar, onCancelar }) {
   const [form, setForm] = useState(inicial ? { ...VACIO, ...inicial } : VACIO);
   const [guardando, setGuardando] = useState(false);
+  const inputArchivoRef = useRef(null);
 
   const campo = (nombre) => (e) => setForm({ ...form, [nombre]: e.target.value });
+
+  const handleArchivo = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const base64 = await archivoABase64(file);
+    setForm({ ...form, foto_url: base64 });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,6 +31,23 @@ export default function PacienteForm({ inicial, onGuardar, onCancelar }) {
 
   return (
     <form onSubmit={handleSubmit}>
+      <div className="form-group">
+        <label>Foto</label>
+        <div className="image-upload-box" onClick={() => inputArchivoRef.current?.click()}>
+          {form.foto_url ? <img src={form.foto_url} alt="Foto del paciente" /> : <span>📷</span>}
+        </div>
+        <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', marginTop: 6 }}>
+          Clic para {form.foto_url ? 'cambiar' : 'cargar'} foto
+        </div>
+        {form.foto_url && (
+          <div style={{ textAlign: 'center' }}>
+            <button type="button" className="btn btn-secondary" style={{ marginTop: 8, padding: '4px 12px', fontSize: 12 }} onClick={() => setForm({ ...form, foto_url: '' })}>
+              Quitar foto
+            </button>
+          </div>
+        )}
+        <input ref={inputArchivoRef} type="file" accept="image/*" onChange={handleArchivo} style={{ display: 'none' }} />
+      </div>
       <div className="form-group">
         <label>Nombre</label>
         <input value={form.nombre} onChange={campo('nombre')} required />

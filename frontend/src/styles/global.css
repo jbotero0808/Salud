@@ -373,6 +373,9 @@ th { color: var(--text-muted); font-weight: 600; }
   gap: 10px;
 }
 .paciente-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   border: 2px solid var(--primary-color);
   border-radius: 12px;
   background: var(--primary-color-light);
@@ -385,6 +388,27 @@ th { color: var(--text-muted); font-weight: 600; }
 .paciente-item.is-selected {
   border-color: var(--primary-color-dark);
   border-width: 3px;
+}
+.paciente-item__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--primary-color-dark);
+}
+.paciente-item__avatar-placeholder {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--primary-color-dark);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
 }
 
 .image-upload-box {

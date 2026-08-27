@@ -10,7 +10,7 @@ async function listar(req, res, next) {
     }
 
     const { rows } = await req.db.query(
-      `SELECT id, nombre, cedula, celular, correo, genero, fecha_nacimiento, direccion, fecha_registro
+      `SELECT id, nombre, cedula, celular, correo, genero, fecha_nacimiento, direccion, foto_url, fecha_registro
          FROM pacientes
         WHERE ${condiciones.join(' AND ')}
         ORDER BY nombre`,
@@ -33,15 +33,15 @@ async function obtener(req, res, next) {
 }
 
 async function crear(req, res, next) {
-  const { nombre, cedula, celular, correo, genero, fecha_nacimiento, direccion } = req.body;
+  const { nombre, cedula, celular, correo, genero, fecha_nacimiento, direccion, foto_url } = req.body;
   if (!nombre || !cedula) {
     return res.status(400).json({ error: 'nombre y cedula son obligatorios' });
   }
   try {
     const { rows } = await req.db.query(
-      `INSERT INTO pacientes (nombre, cedula, celular, correo, genero, fecha_nacimiento, direccion)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [nombre, cedula, celular || null, correo || null, genero || null, fecha_nacimiento || null, direccion || null]
+      `INSERT INTO pacientes (nombre, cedula, celular, correo, genero, fecha_nacimiento, direccion, foto_url)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [nombre, cedula, celular || null, correo || null, genero || null, fecha_nacimiento || null, direccion || null, foto_url || null]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -50,7 +50,7 @@ async function crear(req, res, next) {
 }
 
 async function actualizar(req, res, next) {
-  const { nombre, cedula, celular, correo, genero, fecha_nacimiento, direccion } = req.body;
+  const { nombre, cedula, celular, correo, genero, fecha_nacimiento, direccion, foto_url } = req.body;
   try {
     const { rows } = await req.db.query(
       `UPDATE pacientes SET
@@ -60,10 +60,11 @@ async function actualizar(req, res, next) {
          correo = COALESCE($4, correo),
          genero = COALESCE($5, genero),
          fecha_nacimiento = COALESCE($6, fecha_nacimiento),
-         direccion = COALESCE($7, direccion)
-       WHERE id = $8 AND activo = 's'
+         direccion = COALESCE($7, direccion),
+         foto_url = COALESCE($8, foto_url)
+       WHERE id = $9 AND activo = 's'
        RETURNING *`,
-      [nombre, cedula, celular, correo, genero, fecha_nacimiento, direccion, req.params.id]
+      [nombre, cedula, celular, correo, genero, fecha_nacimiento, direccion, foto_url, req.params.id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Paciente no encontrado' });
     res.json(rows[0]);
