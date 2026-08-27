@@ -121,6 +121,9 @@ export async function generarPdfHistoria({ historia, paciente, medico }) {
   filaInfo('Celular', paciente?.celular);
   filaInfo('Fecha de la cita', historia?.fecha ? FECHA_LARGA.format(new Date(historia.fecha)) : '—');
   filaInfo('Tipo de consulta', historia?.tipo_consulta);
+  if (historia?.proxima_revision) {
+    filaInfo('Próxima revisión', FECHA_LARGA.format(new Date(historia.proxima_revision)));
+  }
 
   y += 4;
   doc.setDrawColor(220, 220, 220);

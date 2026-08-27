@@ -20,16 +20,21 @@ async function obtener(req, res, next) {
   }
 }
 
+const DURACION_REVISION_HORAS = 1;
+
 async function crear(req, res, next) {
-  const { paciente_id, fecha, tipo_consulta, motivo_consulta, diagnostico, tratamiento, observaciones, imagen_url } = req.body;
+  const {
+    paciente_id, fecha, tipo_consulta, motivo_consulta, diagnostico,
+    tratamiento, observaciones, imagen_url, proxima_revision,
+  } = req.body;
   if (!paciente_id || !tipo_consulta) {
     return res.status(400).json({ error: 'paciente_id y tipo_consulta son obligatorios' });
   }
   try {
     const { rows } = await req.db.query(
       `INSERT INTO historias_clinicas
-        (paciente_id, fecha, tipo_consulta, motivo_consulta, diagnostico, tratamiento, observaciones, imagen_url)
-       VALUES ($1, COALESCE($2, now()), $3, $4, $5, $6, $7, $8) RETURNING *`,
+        (paciente_id, fecha, tipo_consulta, motivo_consulta, diagnostico, tratamiento, observaciones, imagen_url, proxima_revision)
+       VALUES ($1, COALESCE($2, now()), $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
       [
         paciente_id,
         fecha || null,
@@ -39,16 +44,36 @@ async function crear(req, res, next) {
         tratamiento || null,
         observaciones || null,
         imagen_url || null,
+        proxima_revision || null,
       ]
     );
-    res.status(201).json(rows[0]);
+    const historia = rows[0];
+
+    // Si se programó una próxima revisión, se agenda automáticamente
+    // la cita correspondiente. No se aborta la creación de la historia
+    // si esto falla: la evolución clínica ya quedó guardada.
+    if (proxima_revision) {
+      try {
+        const inicio = new Date(proxima_revision);
+        const fin = new Date(inicio.getTime() + DURACION_REVISION_HORAS * 60 * 60 * 1000);
+        await req.db.query(
+          `INSERT INTO citas (paciente_id, fecha_inicio, fecha_fin, estado, notas)
+           VALUES ($1, $2, $3, 'programada', $4)`,
+          [paciente_id, inicio, fin, `Próxima revisión agendada desde la historia clínica (${tipo_consulta})`]
+        );
+      } catch (errCita) {
+        console.error('No fue posible crear la cita de seguimiento', errCita);
+      }
+    }
+
+    res.status(201).json(historia);
   } catch (err) {
     next(err);
   }
 }
 
 async function actualizar(req, res, next) {
-  const { tipo_consulta, motivo_consulta, diagnostico, tratamiento, observaciones, imagen_url } = req.body;
+  const { tipo_consulta, motivo_consulta, diagnostico, tratamiento, observaciones, imagen_url, proxima_revision } = req.body;
   try {
     const { rows } = await req.db.query(
       `UPDATE historias_clinicas SET
@@ -57,10 +82,11 @@ async function actualizar(req, res, next) {
          diagnostico = COALESCE($3, diagnostico),
          tratamiento = COALESCE($4, tratamiento),
          observaciones = COALESCE($5, observaciones),
-         imagen_url = COALESCE($6, imagen_url)
-       WHERE id = $7 AND activo = 's'
+         imagen_url = COALESCE($6, imagen_url),
+         proxima_revision = COALESCE($7, proxima_revision)
+       WHERE id = $8 AND activo = 's'
        RETURNING *`,
-      [tipo_consulta, motivo_consulta, diagnostico, tratamiento, observaciones, imagen_url, req.params.id]
+      [tipo_consulta, motivo_consulta, diagnostico, tratamiento, observaciones, imagen_url, proxima_revision, req.params.id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Registro no encontrado' });
     res.json(rows[0]);

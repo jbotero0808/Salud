@@ -25,6 +25,12 @@ export default function HistorialEntry({ historia, paciente }) {
       {historia.tratamiento && (
         <div style={{ marginTop: 4 }}><strong className="text-primary">Tratamiento:</strong> {historia.tratamiento}</div>
       )}
+      {historia.proxima_revision && (
+        <div style={{ marginTop: 4 }}>
+          <strong className="text-primary">Próxima revisión:</strong>{' '}
+          {new Date(historia.proxima_revision).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+        </div>
+      )}
       {historia.imagen_url && (
         <img src={historia.imagen_url} alt="Adjunto" className="historial-entry-img" />
       )}

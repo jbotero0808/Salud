@@ -7,6 +7,7 @@ export default function HistoriaForm({ onGuardar }) {
   const [tipoConsulta, setTipoConsulta] = useState('');
   const [observaciones, setObservaciones] = useState('');
   const [tratamiento, setTratamiento] = useState('');
+  const [proximaRevision, setProximaRevision] = useState('');
   const [imagenBase64, setImagenBase64] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState('');
@@ -31,6 +32,7 @@ export default function HistoriaForm({ onGuardar }) {
   const limpiar = () => {
     setObservaciones('');
     setTratamiento('');
+    setProximaRevision('');
     setImagenBase64(null);
     if (inputArchivoRef.current) inputArchivoRef.current.value = '';
   };
@@ -49,6 +51,7 @@ export default function HistoriaForm({ onGuardar }) {
         observaciones,
         tratamiento,
         imagen_url: imagenBase64,
+        proxima_revision: proximaRevision ? new Date(proximaRevision).toISOString() : null,
       });
       limpiar();
     } catch (err) {
@@ -92,6 +95,18 @@ export default function HistoriaForm({ onGuardar }) {
           style={{ border: 'none', width: '100%', resize: 'vertical' }}
         />
       </fieldset>
+
+      <div className="form-group">
+        <label className="text-primary">Próxima revisión (opcional)</label>
+        <input
+          type="datetime-local"
+          value={proximaRevision}
+          onChange={(e) => setProximaRevision(e.target.value)}
+        />
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+          Si defines una fecha, se agenda automáticamente la cita de seguimiento.
+        </div>
+      </div>
 
       <div
         className="image-upload-box"

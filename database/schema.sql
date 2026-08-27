@@ -81,8 +81,12 @@ CREATE TABLE IF NOT EXISTS public.historias_clinicas (
     tratamiento      TEXT,
     observaciones    TEXT,
     imagen_url       TEXT,
+    proxima_revision TIMESTAMPTZ,
     activo           CHAR(1) NOT NULL DEFAULT 's' CHECK (activo IN ('s','n'))
 );
+
+-- Migración progresiva: agrega la columna si la tabla ya existía de una versión anterior.
+ALTER TABLE public.historias_clinicas ADD COLUMN IF NOT EXISTS proxima_revision TIMESTAMPTZ;
 
 CREATE TABLE IF NOT EXISTS public.tabla_maestra (
     id      SERIAL PRIMARY KEY,
