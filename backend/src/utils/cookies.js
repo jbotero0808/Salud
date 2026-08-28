@@ -2,21 +2,21 @@ const ms = require('ms');
 
 const DURACION_MS = ms(process.env.JWT_EXPIRES_IN || '8h');
 
-// En producción, frontend y backend son dominios distintos de Vercel
-// (vercel.app está en la lista de sufijos públicos, así que cada
-// *.vercel.app cuenta como un "sitio" distinto): eso exige
-// SameSite=None, y SameSite=None a su vez exige Secure.
-//
-// En local, localhost:5173 y localhost:4000 son el mismo "sitio" (el
-// puerto no cuenta para esa definición) — no hace falta SameSite=None,
-// y conviene evitar Secure ahí: casi ningún cliente HTTP (curl,
-// supertest, y algunos navegadores fuera de contextos especiales)
-// reenvía una cookie Secure sobre una conexión sin TLS.
+// El frontend (Vercel) reenvía /api/* a este backend mediante un rewrite
+// (ver frontend/vercel.json) — igual que el proxy de Vite en local. El
+// navegador nunca ve el dominio real del backend: para él, todo ocurre
+// en el origen del frontend. Por eso la cookie puede ser "primera parte"
+// (SameSite=Lax) tanto en local como en producción, sin necesitar
+// SameSite=None — que es justo lo que Safari (iOS) y cada vez más
+// navegadores móviles bloquean o purgan agresivamente por ser "cross-site".
 const esProduccion = Boolean(process.env.VERCEL);
 
 const OPCIONES_BASE = {
+  // Secure exige HTTPS: en producción siempre lo hay; en local casi
+  // ningún cliente HTTP (curl, supertest) reenvía una cookie Secure
+  // sobre una conexión sin TLS, así que se desactiva ahí.
   secure: esProduccion,
-  sameSite: esProduccion ? 'none' : 'lax',
+  sameSite: 'lax',
   path: '/',
 };
 
