@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./instrument');
 
 const app = require('./app');
 

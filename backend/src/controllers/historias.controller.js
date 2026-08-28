@@ -1,9 +1,15 @@
+const { registrarAuditoria } = require('../utils/auditoria');
+
 async function listarPorPaciente(req, res, next) {
   try {
     const { rows } = await req.db.query(
       `SELECT * FROM historias_clinicas WHERE paciente_id = $1 AND activo = 's' ORDER BY fecha DESC`,
       [req.params.pacienteId]
     );
+    await registrarAuditoria({
+      medicoId: req.user.medico_id, accion: 'VER', entidad: 'historias_clinicas',
+      detalle: `historial del paciente ${req.params.pacienteId} (${rows.length} registros)`, ip: req.ip,
+    });
     res.json(rows);
   } catch (err) {
     next(err);
@@ -14,6 +20,9 @@ async function obtener(req, res, next) {
   try {
     const { rows } = await req.db.query(`SELECT * FROM historias_clinicas WHERE id = $1 AND activo = 's'`, [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ error: 'Registro no encontrado' });
+    await registrarAuditoria({
+      medicoId: req.user.medico_id, accion: 'VER', entidad: 'historias_clinicas', entidadId: rows[0].id, ip: req.ip,
+    });
     res.json(rows[0]);
   } catch (err) {
     next(err);
@@ -48,6 +57,11 @@ async function crear(req, res, next) {
       ]
     );
     const historia = rows[0];
+
+    await registrarAuditoria({
+      medicoId: req.user.medico_id, accion: 'CREAR', entidad: 'historias_clinicas', entidadId: historia.id,
+      detalle: `paciente ${paciente_id}, tipo_consulta: ${tipo_consulta}`, ip: req.ip,
+    });
 
     // Si se programó una próxima revisión, se agenda automáticamente
     // la cita correspondiente. No se aborta la creación de la historia
@@ -89,6 +103,9 @@ async function actualizar(req, res, next) {
       [tipo_consulta, motivo_consulta, diagnostico, tratamiento, observaciones, imagen_url, proxima_revision, req.params.id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Registro no encontrado' });
+    await registrarAuditoria({
+      medicoId: req.user.medico_id, accion: 'ACTUALIZAR', entidad: 'historias_clinicas', entidadId: rows[0].id, ip: req.ip,
+    });
     res.json(rows[0]);
   } catch (err) {
     next(err);
@@ -103,6 +120,9 @@ async function eliminar(req, res, next) {
       [req.params.id]
     );
     if (rowCount === 0) return res.status(404).json({ error: 'Registro no encontrado' });
+    await registrarAuditoria({
+      medicoId: req.user.medico_id, accion: 'ELIMINAR', entidad: 'historias_clinicas', entidadId: Number(req.params.id), ip: req.ip,
+    });
     res.status(204).send();
   } catch (err) {
     next(err);

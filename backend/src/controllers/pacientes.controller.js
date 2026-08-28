@@ -1,3 +1,5 @@
+const { registrarAuditoria } = require('../utils/auditoria');
+
 async function listar(req, res, next) {
   const { q } = req.query;
   try {
@@ -43,6 +45,9 @@ async function crear(req, res, next) {
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
       [nombre, cedula, celular || null, correo || null, genero || null, fecha_nacimiento || null, direccion || null, foto_url || null]
     );
+    await registrarAuditoria({
+      medicoId: req.user.medico_id, accion: 'CREAR', entidad: 'pacientes', entidadId: rows[0].id, detalle: nombre, ip: req.ip,
+    });
     res.status(201).json(rows[0]);
   } catch (err) {
     next(err);
@@ -67,6 +72,9 @@ async function actualizar(req, res, next) {
       [nombre, cedula, celular, correo, genero, fecha_nacimiento, direccion, foto_url, req.params.id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Paciente no encontrado' });
+    await registrarAuditoria({
+      medicoId: req.user.medico_id, accion: 'ACTUALIZAR', entidad: 'pacientes', entidadId: rows[0].id, ip: req.ip,
+    });
     res.json(rows[0]);
   } catch (err) {
     next(err);
@@ -81,6 +89,9 @@ async function eliminar(req, res, next) {
       [req.params.id]
     );
     if (rowCount === 0) return res.status(404).json({ error: 'Paciente no encontrado' });
+    await registrarAuditoria({
+      medicoId: req.user.medico_id, accion: 'ELIMINAR', entidad: 'pacientes', entidadId: Number(req.params.id), ip: req.ip,
+    });
     res.status(204).send();
   } catch (err) {
     next(err);

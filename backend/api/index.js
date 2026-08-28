@@ -4,6 +4,7 @@
 // (El servidor tradicional con app.listen sigue viviendo en
 // src/server.js, usado solo para desarrollo local con `npm run dev`.)
 require('dotenv').config();
+require('../src/instrument');
 
 const app = require('../src/app');
 

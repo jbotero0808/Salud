@@ -9,6 +9,7 @@ const pacientesRoutes = require('./routes/pacientes.routes');
 const citasRoutes = require('./routes/citas.routes');
 const historiasRoutes = require('./routes/historias.routes');
 const tablaMaestraRoutes = require('./routes/tablaMaestra.routes');
+const auditoriaRoutes = require('./routes/auditoria.routes');
 const { manejadorErrores } = require('./middleware/error.middleware');
 
 const app = express();
@@ -39,6 +40,7 @@ app.use('/api/pacientes', pacientesRoutes);
 app.use('/api/citas', citasRoutes);
 app.use('/api/historias', historiasRoutes);
 app.use('/api/tabla-maestra', tablaMaestraRoutes);
+app.use('/api/auditoria', auditoriaRoutes);
 
 app.use((req, res) => res.status(404).json({ error: 'Ruta no encontrada' }));
 app.use(manejadorErrores);

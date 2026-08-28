@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const { pool } = require('../config/db');
 const { firmarToken } = require('../utils/jwt');
+const { registrarAuditoria } = require('../utils/auditoria');
 
 const SALT_ROUNDS = 12;
 const COLORES_VALIDOS = ['rojo', 'azul', 'verde', 'morado', 'naranja', 'teal'];
@@ -37,14 +38,18 @@ async function login(req, res, next) {
     );
 
     if (rows.length === 0) {
+      await registrarAuditoria({ accion: 'LOGIN_FALLIDO', entidad: 'medicos', detalle: `correo: ${correo} (no existe)`, ip: req.ip });
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
     const medico = rows[0];
     const passwordValido = await bcrypt.compare(password, medico.password_hash);
     if (!passwordValido) {
+      await registrarAuditoria({ medicoId: medico.id, accion: 'LOGIN_FALLIDO', entidad: 'medicos', entidadId: medico.id, detalle: 'contraseña incorrecta', ip: req.ip });
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
+
+    await registrarAuditoria({ medicoId: medico.id, accion: 'LOGIN_EXITOSO', entidad: 'medicos', entidadId: medico.id, ip: req.ip });
 
     const token = firmarToken(medico);
 

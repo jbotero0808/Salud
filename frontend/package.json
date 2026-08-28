@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@sentry/react": "^10.71.0",
     "axios": "^1.7.2",
     "date-fns": "^3.6.0",
     "jspdf": "^4.2.1",

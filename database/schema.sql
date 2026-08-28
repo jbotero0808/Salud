@@ -108,6 +108,20 @@ INSERT INTO public.tabla_maestra (nombre, tipo, activo) VALUES
     ('Urgencia', 'tipoConsulta', 's')
 ON CONFLICT (nombre, tipo) DO NOTHING;
 
+CREATE TABLE IF NOT EXISTS public.auditoria (
+    id          SERIAL PRIMARY KEY,
+    medico_id   INTEGER REFERENCES public.medicos(id) ON DELETE SET NULL,
+    accion      VARCHAR(30) NOT NULL,   -- LOGIN_EXITOSO, LOGIN_FALLIDO, CREAR, VER, ACTUALIZAR, ELIMINAR
+    entidad     VARCHAR(50) NOT NULL,   -- medicos, pacientes, citas, historias_clinicas
+    entidad_id  INTEGER,
+    detalle     TEXT,
+    ip          VARCHAR(64),
+    fecha       TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_auditoria_fecha ON public.auditoria (fecha DESC);
+CREATE INDEX IF NOT EXISTS idx_auditoria_entidad ON public.auditoria (entidad, entidad_id);
+
 CREATE INDEX IF NOT EXISTS idx_citas_fecha ON public.citas (fecha_inicio);
 CREATE INDEX IF NOT EXISTS idx_historias_paciente ON public.historias_clinicas (paciente_id);
 CREATE INDEX IF NOT EXISTS idx_tabla_maestra_tipo ON public.tabla_maestra (tipo);

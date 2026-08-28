@@ -1,3 +1,5 @@
+const { registrarAuditoria } = require('../utils/auditoria');
+
 const DURACION_DEFECTO_HORAS = 1;
 
 async function listar(req, res, next) {
@@ -73,6 +75,9 @@ async function crear(req, res, next) {
        VALUES ($1,$2,$3,$4,$5) RETURNING *`,
       [paciente_id, inicio, fin, estado || 'programada', notas || null]
     );
+    await registrarAuditoria({
+      medicoId: req.user.medico_id, accion: 'CREAR', entidad: 'citas', entidadId: rows[0].id, ip: req.ip,
+    });
     res.status(201).json(rows[0]);
   } catch (err) {
     next(err);
@@ -94,6 +99,9 @@ async function actualizar(req, res, next) {
       [paciente_id, fecha_inicio, fecha_fin, estado, notas, req.params.id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Cita no encontrada' });
+    await registrarAuditoria({
+      medicoId: req.user.medico_id, accion: 'ACTUALIZAR', entidad: 'citas', entidadId: rows[0].id, ip: req.ip,
+    });
     res.json(rows[0]);
   } catch (err) {
     next(err);
@@ -108,6 +116,9 @@ async function eliminar(req, res, next) {
       [req.params.id]
     );
     if (rowCount === 0) return res.status(404).json({ error: 'Cita no encontrada' });
+    await registrarAuditoria({
+      medicoId: req.user.medico_id, accion: 'ELIMINAR', entidad: 'citas', entidadId: Number(req.params.id), ip: req.ip,
+    });
     res.status(204).send();
   } catch (err) {
     next(err);
