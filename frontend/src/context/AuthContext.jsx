@@ -7,6 +7,9 @@ import { aplicarTitulo } from '../theme/documentTitle';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  // La sesión real vive en una cookie httpOnly (invisible para JS); esto
+  // solo cachea datos de exhibición (nombre, logo, color) para pintar la
+  // UI al instante mientras se confirma la sesión contra el backend.
   const [medico, setMedico] = useState(() => {
     const guardado = localStorage.getItem('salud_medico');
     return guardado ? JSON.parse(guardado) : null;
@@ -14,8 +17,7 @@ export function AuthProvider({ children }) {
   const [modulos, setModulos] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  const persistirSesion = (token, medicoData) => {
-    localStorage.setItem('salud_token', token);
+  const persistirSesion = (medicoData) => {
     localStorage.setItem('salud_medico', JSON.stringify(medicoData));
     setMedico(medicoData);
     aplicarPaleta(medicoData.color_primario);
@@ -25,7 +27,7 @@ export function AuthProvider({ children }) {
 
   const login = async (correo, password) => {
     const { data } = await api.post('/auth/login', { correo, password });
-    persistirSesion(data.token, data.medico);
+    persistirSesion(data.medico);
     return data.medico;
   };
 
@@ -38,21 +40,25 @@ export function AuthProvider({ children }) {
     aplicarTitulo(actualizado.empresa);
   };
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('salud_token');
+  const limpiarSesionLocal = () => {
     localStorage.removeItem('salud_medico');
     setMedico(null);
     setModulos([]);
     aplicarPaleta(null);
     aplicarFavicon(null);
     aplicarTitulo(null);
+  };
+
+  const logout = useCallback(async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch {
+      // Aunque falle la llamada, se limpia el estado local igual.
+    }
+    limpiarSesionLocal();
   }, []);
 
   const refrescarPerfil = useCallback(async () => {
-    if (!localStorage.getItem('salud_token')) {
-      setCargando(false);
-      return;
-    }
     try {
       const { data } = await api.get('/auth/perfil');
       setMedico((prev) => ({ ...prev, ...data.medico }));
@@ -60,12 +66,13 @@ export function AuthProvider({ children }) {
       aplicarPaleta(data.medico.color_primario);
       aplicarFavicon(data.medico.foto_logo_url);
       aplicarTitulo(data.medico.empresa);
+      localStorage.setItem('salud_medico', JSON.stringify(data.medico));
     } catch {
-      logout();
+      limpiarSesionLocal();
     } finally {
       setCargando(false);
     }
-  }, [logout]);
+  }, []);
 
   useEffect(() => {
     if (medico) {
@@ -73,6 +80,8 @@ export function AuthProvider({ children }) {
       aplicarFavicon(medico.foto_logo_url);
       aplicarTitulo(medico.empresa);
     }
+    // La cookie de sesión es httpOnly (invisible para JS), así que la
+    // única forma de saber si sigue vigente es preguntarle al backend.
     refrescarPerfil();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

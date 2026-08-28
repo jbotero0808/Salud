@@ -7,11 +7,13 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "crear-medico": "node scripts/crear-medico.js"
+    "crear-medico": "node scripts/crear-medico.js",
+    "test": "jest --runInBand"
   },
   "dependencies": {
     "@sentry/node": "^10.71.0",
     "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
@@ -19,9 +21,12 @@
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "ms": "^2.1.3",
     "pg": "^8.11.5"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.4",
+    "supertest": "^7.2.2"
   }
 }

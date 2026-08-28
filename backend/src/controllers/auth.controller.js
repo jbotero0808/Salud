@@ -2,6 +2,8 @@ const bcrypt = require('bcrypt');
 const { pool } = require('../config/db');
 const { firmarToken } = require('../utils/jwt');
 const { registrarAuditoria } = require('../utils/auditoria');
+const { generarTokenCsrf } = require('../utils/csrf');
+const { OPCIONES_TOKEN, OPCIONES_CSRF, OPCIONES_LIMPIAR_TOKEN, OPCIONES_LIMPIAR_CSRF } = require('../utils/cookies');
 
 const SALT_ROUNDS = 12;
 const COLORES_VALIDOS = ['rojo', 'azul', 'verde', 'morado', 'naranja', 'teal'];
@@ -52,9 +54,12 @@ async function login(req, res, next) {
     await registrarAuditoria({ medicoId: medico.id, accion: 'LOGIN_EXITOSO', entidad: 'medicos', entidadId: medico.id, ip: req.ip });
 
     const token = firmarToken(medico);
+    const csrfToken = generarTokenCsrf();
+
+    res.cookie('salud_token', token, OPCIONES_TOKEN);
+    res.cookie('salud_csrf', csrfToken, OPCIONES_CSRF);
 
     return res.json({
-      token,
       medico: {
         id: medico.id,
         nombre: medico.nombre,
@@ -68,6 +73,15 @@ async function login(req, res, next) {
   } catch (err) {
     next(err);
   }
+}
+
+// No requiere sesión válida: una cookie ya vencida o corrupta debe poder
+// limpiarse igual. Tampoco exige CSRF — cerrar sesión por una petición
+// forjada no compromete datos, en el peor caso desloguea a la víctima.
+function logout(req, res) {
+  res.clearCookie('salud_token', OPCIONES_LIMPIAR_TOKEN);
+  res.clearCookie('salud_csrf', OPCIONES_LIMPIAR_CSRF);
+  res.json({ ok: true });
 }
 
 async function perfil(req, res, next) {
@@ -166,4 +180,4 @@ async function cambiarPassword(req, res, next) {
   }
 }
 
-module.exports = { branding, login, perfil, actualizarPerfil, cambiarPassword };
+module.exports = { branding, login, logout, perfil, actualizarPerfil, cambiarPassword };

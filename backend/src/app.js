@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const morgan = require('morgan');
 
@@ -21,7 +22,20 @@ const app = express();
 app.set('trust proxy', 1);
 
 app.use(helmet());
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+
+// Falla cerrado, no abierto: si CORS_ORIGIN no está definida, no se
+// permite ningún origen cross-origin en vez de aceptar cualquiera ('*').
+// Un despliegue mal configurado debe romperse de forma visible, no
+// quedar abierto a cualquier sitio silenciosamente.
+if (!process.env.CORS_ORIGIN) {
+  console.warn('⚠️  CORS_ORIGIN no está definida — se bloquearán todas las peticiones cross-origin.');
+}
+// credentials:true es obligatorio para que el navegador envíe/reciba las
+// cookies de sesión entre el frontend y el backend (dominios distintos de
+// Vercel). No es compatible con origin:'*' — por eso CORS_ORIGIN debe ser
+// una URL exacta, nunca un comodín.
+app.use(cors({ origin: process.env.CORS_ORIGIN || false, credentials: true }));
+app.use(cookieParser());
 app.use(express.json({ limit: '8mb' })); // las evoluciones pueden incluir imágenes en base64
 app.use(morgan('dev'));
 
