@@ -1,5 +1,6 @@
 import PerfilForm from './PerfilForm';
 import CambiarPasswordForm from './CambiarPasswordForm';
+import TiposConsultaForm from './TiposConsultaForm';
 
 export default function ConfiguracionPage() {
   return (
@@ -11,6 +12,7 @@ export default function ConfiguracionPage() {
       <div style={{ display: 'grid', gap: 20, maxWidth: 520 }}>
         <PerfilForm />
         <CambiarPasswordForm />
+        <TiposConsultaForm />
       </div>
     </div>
   );
