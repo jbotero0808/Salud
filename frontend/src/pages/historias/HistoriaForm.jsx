@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import { es } from 'date-fns/locale';
+import 'react-datepicker/dist/react-datepicker.css';
 import api from '../../services/api';
 import { archivoABase64 } from '../../utils/archivo';
+
+registerLocale('es', es);
 
 export default function HistoriaForm({ onGuardar }) {
   const [tiposConsulta, setTiposConsulta] = useState([]);
   const [tipoConsulta, setTipoConsulta] = useState('');
   const [observaciones, setObservaciones] = useState('');
   const [tratamiento, setTratamiento] = useState('');
-  const [proximaRevision, setProximaRevision] = useState('');
+  const [proximaRevision, setProximaRevision] = useState(null);
   const [imagenBase64, setImagenBase64] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState('');
@@ -32,7 +37,7 @@ export default function HistoriaForm({ onGuardar }) {
   const limpiar = () => {
     setObservaciones('');
     setTratamiento('');
-    setProximaRevision('');
+    setProximaRevision(null);
     setImagenBase64(null);
     if (inputArchivoRef.current) inputArchivoRef.current.value = '';
   };
@@ -51,7 +56,7 @@ export default function HistoriaForm({ onGuardar }) {
         observaciones,
         tratamiento,
         imagen_url: imagenBase64,
-        proxima_revision: proximaRevision ? new Date(proximaRevision).toISOString() : null,
+        proxima_revision: proximaRevision ? proximaRevision.toISOString() : null,
       });
       limpiar();
     } catch (err) {
@@ -98,10 +103,16 @@ export default function HistoriaForm({ onGuardar }) {
 
       <div className="form-group">
         <label className="text-primary">Próxima revisión (opcional)</label>
-        <input
-          type="datetime-local"
-          value={proximaRevision}
-          onChange={(e) => setProximaRevision(e.target.value)}
+        <DatePicker
+          selected={proximaRevision}
+          onChange={setProximaRevision}
+          showTimeSelect
+          locale="es"
+          dateFormat="dd/MM/yyyy HH:mm"
+          placeholderText="Selecciona fecha y hora..."
+          isClearable
+          wrapperClassName="selector-fecha-wrapper"
+          autoComplete="off"
         />
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
           Si defines una fecha, se agenda automáticamente la cita de seguimiento.

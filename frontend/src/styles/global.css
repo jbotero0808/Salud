@@ -497,3 +497,45 @@ th { color: var(--text-muted); font-weight: 600; }
   padding: 16px;
   border-radius: 10px;
 }
+
+/* ---------- Selector de fecha/hora (react-datepicker) con el color del médico ---------- */
+.selector-fecha-wrapper { display: block; width: 100%; }
+.selector-fecha-wrapper .react-datepicker-wrapper { display: block; width: 100%; }
+
+.react-datepicker {
+  font-family: inherit;
+  border-color: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.react-datepicker__header {
+  background: var(--primary-color-light);
+  border-bottom: 1px solid var(--border);
+}
+.react-datepicker__current-month,
+.react-datepicker__day-name,
+.react-datepicker-time__header {
+  color: var(--primary-color-dark);
+}
+.react-datepicker__navigation-icon::before {
+  border-color: var(--primary-color-dark);
+}
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__time-list-item--selected {
+  background-color: var(--primary-color) !important;
+  color: #fff !important;
+}
+.react-datepicker__day:hover {
+  background-color: var(--primary-color-light);
+}
+.react-datepicker__time-list-item:hover {
+  background-color: var(--primary-color-light) !important;
+}
+.react-datepicker__triangle::before,
+.react-datepicker__triangle::after {
+  border-bottom-color: var(--primary-color-light) !important;
+}
+.react-datepicker__close-icon::after {
+  background-color: var(--primary-color);
+}
