@@ -46,7 +46,6 @@ const FECHA_LARGA = new Intl.DateTimeFormat('es-CO', {
 
 export async function generarPdfHistoria({ historia, paciente, medico }) {
   const paleta = PALETAS[medico?.color_primario] || PALETAS[COLOR_POR_DEFECTO];
-  const [pr, pg, pb] = hexARgb(paleta.primary);
   const [dr, dg, db] = hexARgb(paleta.dark);
 
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
@@ -98,7 +97,7 @@ export async function generarPdfHistoria({ historia, paciente, medico }) {
   }
 
   y += 30;
-  doc.setDrawColor(pr, pg, pb);
+  doc.setDrawColor(dr, dg, db);
   doc.setLineWidth(1.2);
   doc.line(margen, y, anchoPagina - margen, y);
   y += 12;
@@ -106,7 +105,7 @@ export async function generarPdfHistoria({ historia, paciente, medico }) {
   // ---------- Título ----------
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(15);
-  doc.setTextColor(30, 30, 30);
+  doc.setTextColor(dr, dg, db);
   doc.text('Historia Clínica', margen, y);
   y += 11;
 
@@ -144,7 +143,7 @@ export async function generarPdfHistoria({ historia, paciente, medico }) {
   const seccion = (titulo, contenido) => {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
-    doc.setTextColor(pr, pg, pb);
+    doc.setTextColor(dr, dg, db);
     doc.text(titulo, margen, y);
     y += 8;
 
@@ -187,7 +186,7 @@ export async function generarPdfHistoria({ historia, paciente, medico }) {
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
-      doc.setTextColor(pr, pg, pb);
+      doc.setTextColor(dr, dg, db);
       doc.text('Imagen adjunta', margen, y);
       y += 7;
 
