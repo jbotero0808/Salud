@@ -1,11 +1,7 @@
 import axios from 'axios';
+import { obtenerCsrfToken } from './csrfStore';
 
 const METODOS_MUTANTES = new Set(['post', 'put', 'patch', 'delete']);
-
-function leerCookie(nombre) {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${nombre}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : null;
-}
 
 // En local, Vite hace proxy de /api hacia el backend (ver vite.config.js).
 // En producción, el frontend y el backend son proyectos de Vercel
@@ -21,7 +17,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const metodo = (config.method || 'get').toLowerCase();
   if (METODOS_MUTANTES.has(metodo)) {
-    const csrf = leerCookie('salud_csrf');
+    const csrf = obtenerCsrfToken();
     if (csrf) {
       config.headers['X-CSRF-Token'] = csrf;
     }

@@ -4,11 +4,17 @@ const METODOS_MUTANTES = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 // Lee la sesión de la cookie httpOnly (no del header Authorization) y,
 // para peticiones que modifican datos, exige que el header X-CSRF-Token
-// coincida con la cookie CSRF (no httpOnly) — patrón de "doble envío".
-// Un sitio atacante puede lograr que el navegador de la víctima adjunte
-// la cookie de sesión sola, pero no puede leer su valor para replicarlo
-// en el header, porque las cookies de otro dominio no son visibles
-// desde JavaScript en el origen del atacante.
+// coincida con el valor "csrf" firmado dentro del propio JWT.
+//
+// El CSRF no viaja en una cookie aparte: frontend y backend son dominios
+// distintos en producción, así que JS del frontend no podría leer una
+// cookie puesta por el backend de todos modos (política de origen del
+// navegador). En su lugar, el valor se le entrega al frontend en el
+// cuerpo de la respuesta de login/perfil. Un sitio atacante puede lograr
+// que el navegador de la víctima adjunte la cookie de sesión sola en una
+// petición forjada, pero nunca podrá conocer el valor de "csrf" para
+// replicarlo en el header, porque nunca recibió (ni puede leer, por CORS)
+// una respuesta legítima de nuestra API.
 function autenticarJWT(req, res, next) {
   const token = req.cookies?.salud_token;
 
@@ -24,14 +30,13 @@ function autenticarJWT(req, res, next) {
   }
 
   if (METODOS_MUTANTES.has(req.method)) {
-    const csrfCookie = req.cookies?.salud_csrf;
     const csrfHeader = req.headers['x-csrf-token'];
-    if (!csrfCookie || !csrfHeader || csrfCookie !== csrfHeader) {
+    if (!csrfHeader || csrfHeader !== payload.csrf) {
       return res.status(403).json({ error: 'Token CSRF inválido o ausente' });
     }
   }
 
-  req.user = payload; // { medico_id, correo, color_primario }
+  req.user = payload; // { medico_id, correo, color_primario, csrf }
   next();
 }
 

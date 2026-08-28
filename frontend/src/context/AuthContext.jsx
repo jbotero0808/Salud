@@ -3,6 +3,7 @@ import api from '../services/api';
 import { aplicarPaleta } from '../theme/paletas';
 import { aplicarFavicon } from '../theme/favicon';
 import { aplicarTitulo } from '../theme/documentTitle';
+import { fijarCsrfToken } from '../services/csrfStore';
 
 const AuthContext = createContext(null);
 
@@ -27,6 +28,7 @@ export function AuthProvider({ children }) {
 
   const login = async (correo, password) => {
     const { data } = await api.post('/auth/login', { correo, password });
+    fijarCsrfToken(data.csrfToken);
     persistirSesion(data.medico);
     return data.medico;
   };
@@ -42,6 +44,7 @@ export function AuthProvider({ children }) {
 
   const limpiarSesionLocal = () => {
     localStorage.removeItem('salud_medico');
+    fijarCsrfToken(null);
     setMedico(null);
     setModulos([]);
     aplicarPaleta(null);
@@ -61,6 +64,7 @@ export function AuthProvider({ children }) {
   const refrescarPerfil = useCallback(async () => {
     try {
       const { data } = await api.get('/auth/perfil');
+      fijarCsrfToken(data.csrfToken);
       setMedico((prev) => ({ ...prev, ...data.medico }));
       setModulos(data.modulos);
       aplicarPaleta(data.medico.color_primario);

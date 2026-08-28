@@ -16,11 +16,7 @@ async function crearSesion() {
     throw new Error(`No fue posible iniciar sesión de prueba: ${JSON.stringify(res.body)}`);
   }
 
-  const cookiesFijadas = res.headers['set-cookie'] || [];
-  const cookieCsrf = cookiesFijadas.find((c) => c.startsWith('salud_csrf='));
-  const csrfToken = cookieCsrf ? cookieCsrf.split(';')[0].split('=')[1] : null;
-
-  return { agente, csrfToken, medico: res.body.medico };
+  return { agente, csrfToken: res.body.csrfToken, medico: res.body.medico };
 }
 
 module.exports = { app, pool, CREDENCIALES_VALIDAS, crearSesion };

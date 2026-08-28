@@ -21,12 +21,10 @@ const OPCIONES_BASE = {
 };
 
 const OPCIONES_TOKEN = { ...OPCIONES_BASE, httpOnly: true, maxAge: DURACION_MS };
-const OPCIONES_CSRF = { ...OPCIONES_BASE, httpOnly: false, maxAge: DURACION_MS };
 
 // res.clearCookie necesita los mismos atributos que se usaron al fijar la
 // cookie (path, sameSite, secure) para poder borrarla, pero sin maxAge
 // (Express lo tiene deprecado en clearCookie desde v4.19).
 const OPCIONES_LIMPIAR_TOKEN = { ...OPCIONES_BASE, httpOnly: true };
-const OPCIONES_LIMPIAR_CSRF = { ...OPCIONES_BASE, httpOnly: false };
 
-module.exports = { OPCIONES_TOKEN, OPCIONES_CSRF, OPCIONES_LIMPIAR_TOKEN, OPCIONES_LIMPIAR_CSRF };
+module.exports = { OPCIONES_TOKEN, OPCIONES_LIMPIAR_TOKEN };

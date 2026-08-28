@@ -3,7 +3,7 @@ const { pool } = require('../config/db');
 const { firmarToken } = require('../utils/jwt');
 const { registrarAuditoria } = require('../utils/auditoria');
 const { generarTokenCsrf } = require('../utils/csrf');
-const { OPCIONES_TOKEN, OPCIONES_CSRF, OPCIONES_LIMPIAR_TOKEN, OPCIONES_LIMPIAR_CSRF } = require('../utils/cookies');
+const { OPCIONES_TOKEN, OPCIONES_LIMPIAR_TOKEN } = require('../utils/cookies');
 
 const SALT_ROUNDS = 12;
 const COLORES_VALIDOS = ['rojo', 'azul', 'verde', 'morado', 'naranja', 'teal'];
@@ -53,11 +53,15 @@ async function login(req, res, next) {
 
     await registrarAuditoria({ medicoId: medico.id, accion: 'LOGIN_EXITOSO', entidad: 'medicos', entidadId: medico.id, ip: req.ip });
 
-    const token = firmarToken(medico);
     const csrfToken = generarTokenCsrf();
+    const token = firmarToken(medico, csrfToken);
 
+    // El CSRF viaja embebido y firmado dentro del JWT (cookie httpOnly) y
+    // se le entrega al frontend en el cuerpo de la respuesta — no como una
+    // cookie aparte. Frontend y backend son dominios distintos en
+    // producción, así que JS del frontend no podría leer una cookie del
+    // backend de todos modos; el cuerpo de la respuesta sí es legible.
     res.cookie('salud_token', token, OPCIONES_TOKEN);
-    res.cookie('salud_csrf', csrfToken, OPCIONES_CSRF);
 
     return res.json({
       medico: {
@@ -69,6 +73,7 @@ async function login(req, res, next) {
         empresa: medico.empresa,
         profesion: medico.profesion,
       },
+      csrfToken,
     });
   } catch (err) {
     next(err);
@@ -80,7 +85,6 @@ async function login(req, res, next) {
 // forjada no compromete datos, en el peor caso desloguea a la víctima.
 function logout(req, res) {
   res.clearCookie('salud_token', OPCIONES_LIMPIAR_TOKEN);
-  res.clearCookie('salud_csrf', OPCIONES_LIMPIAR_CSRF);
   res.json({ ok: true });
 }
 
@@ -106,7 +110,7 @@ async function perfil(req, res, next) {
       [req.user.medico_id]
     );
 
-    return res.json({ medico: rows[0], modulos });
+    return res.json({ medico: rows[0], modulos, csrfToken: req.user.csrf });
   } catch (err) {
     next(err);
   }

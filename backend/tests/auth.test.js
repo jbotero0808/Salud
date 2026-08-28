@@ -6,20 +6,22 @@ afterAll(async () => {
 });
 
 describe('POST /api/auth/login', () => {
-  it('inicia sesión con credenciales correctas y fija las cookies de sesión', async () => {
+  it('inicia sesión con credenciales correctas, fija la cookie httpOnly y entrega el CSRF en el cuerpo', async () => {
     const res = await request(app).post('/api/auth/login').send(CREDENCIALES_VALIDAS);
     expect(res.status).toBe(200);
     expect(res.body.medico.correo).toBe(CREDENCIALES_VALIDAS.correo);
     expect(res.body.token).toBeUndefined();
     expect(res.body.medico.password_hash).toBeUndefined();
+    expect(typeof res.body.csrfToken).toBe('string');
+    expect(res.body.csrfToken.length).toBeGreaterThan(10);
 
     const cookies = res.headers['set-cookie'] || [];
     const cookieToken = cookies.find((c) => c.startsWith('salud_token='));
-    const cookieCsrf = cookies.find((c) => c.startsWith('salud_csrf='));
     expect(cookieToken).toBeDefined();
     expect(cookieToken).toMatch(/HttpOnly/i);
-    expect(cookieCsrf).toBeDefined();
-    expect(cookieCsrf).not.toMatch(/HttpOnly/i);
+    // El CSRF no debe viajar como cookie: el frontend en producción está
+    // en otro dominio y no podría leerla.
+    expect(cookies.some((c) => c.startsWith('salud_csrf='))).toBe(false);
   });
 
   it('rechaza una contraseña incorrecta', async () => {
@@ -70,7 +72,7 @@ describe('CSRF en peticiones que modifican datos', () => {
     expect(res.status).toBe(403);
   });
 
-  it('rechaza un POST con un X-CSRF-Token que no coincide con la cookie', async () => {
+  it('rechaza un POST con un X-CSRF-Token que no coincide con el embebido en el JWT', async () => {
     const { agente } = await crearSesion();
     const res = await agente
       .post('/api/pacientes')
@@ -79,7 +81,7 @@ describe('CSRF en peticiones que modifican datos', () => {
     expect(res.status).toBe(403);
   });
 
-  it('acepta un POST cuando el X-CSRF-Token coincide con la cookie', async () => {
+  it('acepta un POST cuando el X-CSRF-Token coincide con el entregado al iniciar sesión', async () => {
     const { agente, csrfToken } = await crearSesion();
     const cedula = `CSRF-OK-${Date.now()}`;
     const res = await agente.post('/api/pacientes').set('X-CSRF-Token', csrfToken).send({ nombre: 'X', cedula });
