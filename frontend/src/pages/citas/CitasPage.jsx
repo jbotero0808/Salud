@@ -5,14 +5,39 @@ import CitaForm from './CitaForm';
 import MonthView from './MonthView';
 import WeekView from './WeekView';
 import DayView from './DayView';
+import ThreeDayView from './ThreeDayView';
 import { rangoParaVista, avanzar, format } from './calendarUtils';
 
+const ANCHO_MOVIL = 640;
+const ETIQUETAS_VISTA = { dia: 'Día', tresdias: '3 días', semana: 'Semana', mes: 'Mes' };
+
+function esPantallaMovil() {
+  return typeof window !== 'undefined' && window.innerWidth <= ANCHO_MOVIL;
+}
+
 export default function CitasPage() {
-  const [vista, setVista] = useState('mes');
+  // En celulares, Mes/Semana usan una grilla de 7 columnas ilegible en
+  // pantallas angostas; se reemplazan por una vista compacta de 3 días.
+  const [esMovil, setEsMovil] = useState(esPantallaMovil);
+  const [vista, setVista] = useState(() => (esPantallaMovil() ? 'tresdias' : 'mes'));
   const [fechaRef, setFechaRef] = useState(new Date());
   const [citas, setCitas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [modal, setModal] = useState(null); // { modo: 'nueva'|'editar', fechaSugerida, cita }
+
+  useEffect(() => {
+    const alRedimensionar = () => setEsMovil(esPantallaMovil());
+    window.addEventListener('resize', alRedimensionar);
+    return () => window.removeEventListener('resize', alRedimensionar);
+  }, []);
+
+  useEffect(() => {
+    if (esMovil && (vista === 'mes' || vista === 'semana')) setVista('tresdias');
+    if (!esMovil && vista === 'tresdias') setVista('mes');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [esMovil]);
+
+  const vistasDisponibles = esMovil ? ['dia', 'tresdias'] : ['dia', 'semana', 'mes'];
 
   const cargar = async () => {
     setCargando(true);
@@ -51,11 +76,11 @@ export default function CitasPage() {
           <button className="btn btn-secondary" onClick={() => setFechaRef(avanzar(vista, fechaRef, -1))}>‹</button>
           <button className="btn btn-secondary" onClick={() => setFechaRef(new Date())}>Hoy</button>
           <button className="btn btn-secondary" onClick={() => setFechaRef(avanzar(vista, fechaRef, 1))}>›</button>
-          <strong style={{ marginLeft: 8 }}>{format(fechaRef, vista === 'dia' ? 'd MMMM yyyy' : 'MMMM yyyy')}</strong>
+          <strong style={{ marginLeft: 8 }}>{format(fechaRef, vista === 'dia' || vista === 'tresdias' ? 'd MMMM yyyy' : 'MMMM yyyy')}</strong>
           <div className="view-tabs">
-            {['dia', 'semana', 'mes'].map((v) => (
+            {vistasDisponibles.map((v) => (
               <button key={v} className={vista === v ? 'is-active' : ''} onClick={() => setVista(v)}>
-                {v === 'dia' ? 'Día' : v === 'semana' ? 'Semana' : 'Mes'}
+                {ETIQUETAS_VISTA[v]}
               </button>
             ))}
           </div>
@@ -67,6 +92,13 @@ export default function CitasPage() {
           <MonthView fechaRef={fechaRef} citas={citas} onDiaClick={(dia) => setModal({ fechaSugerida: dia })} />
         ) : vista === 'semana' ? (
           <WeekView
+            fechaRef={fechaRef}
+            citas={citas}
+            onDiaClick={(dia) => setModal({ fechaSugerida: dia })}
+            onCitaClick={(cita) => setModal({ cita, fechaSugerida: new Date(cita.fecha_inicio) })}
+          />
+        ) : vista === 'tresdias' ? (
+          <ThreeDayView
             fechaRef={fechaRef}
             citas={citas}
             onDiaClick={(dia) => setModal({ fechaSugerida: dia })}

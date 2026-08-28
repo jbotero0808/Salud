@@ -19,6 +19,12 @@ export function diasDeLaSemana(fechaRef) {
   return eachDayOfInterval({ start: inicio, end: addDays(inicio, 6) });
 }
 
+// Vista compacta para celulares: solo 3 días (evita la grilla de 7
+// columnas de Mes/Semana, que en pantallas angostas queda ilegible).
+export function diasTresDias(fechaRef) {
+  return eachDayOfInterval({ start: fechaRef, end: addDays(fechaRef, 2) });
+}
+
 export function rangoParaVista(vista, fechaRef) {
   if (vista === 'mes') {
     const dias = diasDelMes(fechaRef);
@@ -26,6 +32,10 @@ export function rangoParaVista(vista, fechaRef) {
   }
   if (vista === 'semana') {
     const dias = diasDeLaSemana(fechaRef);
+    return { desde: dias[0], hasta: dias[dias.length - 1] };
+  }
+  if (vista === 'tresdias') {
+    const dias = diasTresDias(fechaRef);
     return { desde: dias[0], hasta: dias[dias.length - 1] };
   }
   return { desde: fechaRef, hasta: fechaRef };
