@@ -30,6 +30,9 @@ export function AuthProvider({ children }) {
     const { data } = await api.post('/auth/login', { correo, password });
     fijarCsrfToken(data.csrfToken);
     persistirSesion(data.medico);
+    // El login no trae los módulos habilitados; se piden aparte para que
+    // el menú refleje los permisos reales sin esperar a un refresh.
+    await refrescarPerfil();
     return data.medico;
   };
 
